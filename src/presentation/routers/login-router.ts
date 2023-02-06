@@ -38,6 +38,6 @@ export class LoginRouter {
     }
 
     this.authUseCaseSpy.auth(email, password);
-    return { statusCode: StatusCodes.OK } as HttpResponse;
+    return { statusCode: StatusCodes.UNAUTHORIZED } as HttpResponse;
   }
 }
