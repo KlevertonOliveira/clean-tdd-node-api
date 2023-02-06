@@ -13,9 +13,10 @@ interface HttpResponse {
 
 class LoginRouter {
   route(httpRequest: HttpRequest) {
+    const { email, password } = httpRequest.body;
     let httpResponse: HttpResponse = { statusCode: 200 };
 
-    if (!httpRequest.body.email || !httpRequest.body.password) {
+    if (!email || !password) {
       httpResponse.statusCode = 400;
     }
 
