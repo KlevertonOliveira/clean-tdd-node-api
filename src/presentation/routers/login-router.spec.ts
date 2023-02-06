@@ -1,9 +1,10 @@
 import { describe, expect, it } from 'vitest';
+import { StatusCodes } from 'http-status-codes';
 
 interface HttpRequest {
-  body: {
-    email: string;
-    password: string;
+  body?: {
+    email?: string;
+    password?: string;
   };
 }
 
@@ -12,12 +13,18 @@ interface HttpResponse {
 }
 
 class LoginRouter {
-  route(httpRequest: HttpRequest) {
+  route(httpRequest?: HttpRequest): HttpResponse {
+    let httpResponse: HttpResponse = { statusCode: StatusCodes.OK };
+
+    if (!httpRequest || !httpRequest.body) {
+      httpResponse.statusCode = StatusCodes.INTERNAL_SERVER_ERROR;
+      return httpResponse;
+    }
+
     const { email, password } = httpRequest.body;
-    let httpResponse: HttpResponse = { statusCode: 200 };
 
     if (!email || !password) {
-      httpResponse.statusCode = 400;
+      httpResponse.statusCode = StatusCodes.BAD_REQUEST;
     }
 
     return httpResponse;
@@ -25,7 +32,7 @@ class LoginRouter {
 }
 
 describe('Login Router', () => {
-  it('should return 400 if no email is provided', () => {
+  it('should return "BAD_REQUEST" (400) status if no email is provided', () => {
     const sut = new LoginRouter();
     const httpRequest: HttpRequest = {
       body: {
@@ -34,10 +41,10 @@ describe('Login Router', () => {
     };
 
     const httpResponse: HttpResponse = sut.route(httpRequest);
-    expect(httpResponse.statusCode).toBe(400);
+    expect(httpResponse.statusCode).toBe(StatusCodes.BAD_REQUEST);
   });
 
-  it('should return 400 if no password is provided', () => {
+  it('should return "BAD_REQUEST" (400) status if no password is provided', () => {
     const sut = new LoginRouter();
     const httpRequest: HttpRequest = {
       body: {
@@ -46,6 +53,19 @@ describe('Login Router', () => {
     };
 
     const httpResponse: HttpResponse = sut.route(httpRequest);
-    expect(httpResponse.statusCode).toBe(400);
+    expect(httpResponse.statusCode).toBe(StatusCodes.BAD_REQUEST);
+  });
+
+  it('should return "INTERNAL_SERVER_ERROR" (500) status if no httpRequest is provided', () => {
+    const sut = new LoginRouter();
+    const httpResponse: HttpResponse = sut.route();
+    expect(httpResponse.statusCode).toBe(StatusCodes.INTERNAL_SERVER_ERROR);
+  });
+
+  it('should return "INTERNAL_SERVER_ERROR" (500) status if httpRequest has no body', () => {
+    const sut = new LoginRouter();
+    const httpRequest: HttpRequest = {};
+    const httpResponse: HttpResponse = sut.route(httpRequest);
+    expect(httpResponse.statusCode).toBe(StatusCodes.INTERNAL_SERVER_ERROR);
   });
 });
