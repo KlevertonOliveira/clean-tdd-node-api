@@ -1,5 +1,6 @@
 import { StatusCodes } from 'http-status-codes';
 import { MissingParamError } from '../helpers/missing-param-error';
+import { UnauthorizedError } from '../helpers/unauthorized-error';
 
 export interface HttpRequest {
   body?: {
@@ -14,7 +15,7 @@ interface HttpResponse {
 }
 
 export class LoginRouter {
-  constructor(authUseCaseSpy: AuthUseCaseSpy) {
+  constructor(authUseCaseSpy) {
     this.authUseCaseSpy = authUseCaseSpy;
   }
 
@@ -38,6 +39,10 @@ export class LoginRouter {
     }
 
     this.authUseCaseSpy.auth(email, password);
-    return { statusCode: StatusCodes.UNAUTHORIZED } as HttpResponse;
+
+    return {
+      statusCode: StatusCodes.UNAUTHORIZED,
+      body: new UnauthorizedError(),
+    } as HttpResponse;
   }
 }

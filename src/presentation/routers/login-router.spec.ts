@@ -1,11 +1,12 @@
-import { describe, expect, it } from 'vitest';
 import { StatusCodes } from 'http-status-codes';
-import { HttpRequest, LoginRouter } from './login-router';
+import { describe, expect, it } from 'vitest';
 import { MissingParamError } from '../helpers/missing-param-error';
+import { UnauthorizedError } from '../helpers/unauthorized-error';
+import { HttpRequest, LoginRouter } from './login-router';
 
 const makeSut = () => {
   class AuthUseCaseSpy {
-    auth(email: string, password: string) {
+    auth(email, password) {
       this.email = email;
       this.password = password;
     }
@@ -69,12 +70,12 @@ describe('Login Router', () => {
     };
 
     sut.route(httpRequest);
-    expect(authUseCaseSpy.email).toBe(httpRequest.body?.email);
-    expect(authUseCaseSpy.password).toBe(httpRequest.body?.password);
+    expect(authUseCaseSpy.email).toBe(httpRequest.body.email);
+    expect(authUseCaseSpy.password).toBe(httpRequest.body.password);
   });
 
   it('should return "UNAUTHORIZED" (401) when invalid credentials are provided', () => {
-    const { sut, authUseCaseSpy } = makeSut();
+    const { sut } = makeSut();
     const httpRequest: HttpRequest = {
       body: {
         email: 'invalid_email@test.com',
@@ -84,5 +85,6 @@ describe('Login Router', () => {
 
     const httpResponse = sut.route(httpRequest);
     expect(httpResponse.statusCode).toBe(StatusCodes.UNAUTHORIZED);
+    expect(httpResponse.body).toEqual(new UnauthorizedError());
   });
 });
