@@ -16,5 +16,10 @@
   "bugs": {
     "url": "https://github.com/KlevertonOliveira/clean-tdd-node-api/issues"
   },
-  "homepage": "https://github.com/KlevertonOliveira/clean-tdd-node-api#readme"
+  "homepage": "https://github.com/KlevertonOliveira/clean-tdd-node-api#readme",
+  "devDependencies": {
+    "@typescript-eslint/eslint-plugin": "^5.50.0",
+    "@typescript-eslint/parser": "^5.50.0",
+    "eslint": "^8.33.0"
+  }
 }
