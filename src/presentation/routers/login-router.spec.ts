@@ -1,50 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { StatusCodes } from 'http-status-codes';
-
-interface HttpRequest {
-  body?: {
-    email?: string;
-    password?: string;
-  };
-}
-
-interface HttpResponse {
-  statusCode: number;
-  body?: string | MissingParamError;
-}
-
-type ParamName = 'email' | 'password';
-
-class MissingParamError extends Error {
-  constructor(paramName: ParamName) {
-    super(`Missing param: ${paramName}`);
-    this.name = 'MissingParamError';
-  }
-}
-
-class LoginRouter {
-  route(httpRequest?: HttpRequest): HttpResponse {
-    if (!httpRequest || !httpRequest.body) {
-      return { statusCode: StatusCodes.INTERNAL_SERVER_ERROR } as HttpResponse;
-    }
-
-    const { email, password } = httpRequest.body;
-    if (!email) {
-      return {
-        statusCode: StatusCodes.BAD_REQUEST,
-        body: new MissingParamError('email'),
-      } as HttpResponse;
-    }
-    if (!password) {
-      return {
-        statusCode: StatusCodes.BAD_REQUEST,
-        body: new MissingParamError('password'),
-      } as HttpResponse;
-    }
-
-    return { statusCode: StatusCodes.OK } as HttpResponse;
-  }
-}
+import { HttpRequest, LoginRouter } from './login-router';
+import { MissingParamError } from '../helpers/missing-param-error';
 
 describe('Login Router', () => {
   it('should return "BAD_REQUEST" (400) status if no email is provided', () => {
