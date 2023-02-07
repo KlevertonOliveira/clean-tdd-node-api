@@ -36,6 +36,16 @@ const makeEmailValidator = () => {
   return emailValidatorSpy;
 };
 
+const makeEmailValidatorWithError = () => {
+  class EmailValidatorSpy {
+    isValid() {
+      throw new Error('');
+    }
+  }
+
+  return new EmailValidatorSpy();
+};
+
 const makeSut = () => {
   const emailValidatorSpy = makeEmailValidator();
   const authUseCaseSpy = makeAuthUseCase();
@@ -213,5 +223,21 @@ describe('Login Router', () => {
     const response = await sut.route(httpRequest);
     expect(response.statusCode).toBe(StatusCodes.INTERNAL_SERVER_ERROR);
     expect(response.body).toEqual(new ServerError());
+  });
+
+  it('should return "INTERNAL_SERVER_ERROR" (500) status if EmailValidator throws', async () => {
+    const emailValidatorSpy = makeEmailValidatorWithError();
+    const authUseCaseSpy = makeAuthUseCase();
+    const sut = new LoginRouter(authUseCaseSpy, emailValidatorSpy);
+
+    const httpRequest = {
+      body: {
+        email: 'any_email@test.com',
+        password: 'any_password',
+      },
+    };
+    const httpResponse = await sut.route(httpRequest);
+    expect(httpResponse.statusCode).toBe(StatusCodes.INTERNAL_SERVER_ERROR);
+    expect(httpResponse.body).toEqual(new ServerError());
   });
 });
