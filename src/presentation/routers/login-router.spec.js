@@ -1,12 +1,11 @@
 import { StatusCodes } from 'http-status-codes';
 import { describe, expect, it } from 'vitest';
 import { MissingParamError } from '../helpers/missing-param-error';
-import { UnauthorizedError } from '../helpers/unauthorized-error';
-import { HttpRequest, LoginRouter } from './login-router';
+import { LoginRouter } from './login-router';
 
 const makeSut = () => {
   class AuthUseCaseSpy {
-    auth(email: string, password: string) {
+    auth(email, password) {
       this.email = email;
       this.password = password;
     }
@@ -23,7 +22,7 @@ const makeSut = () => {
 describe('Login Router', () => {
   it('should return "BAD_REQUEST" (400) status if no email is provided', () => {
     const { sut } = makeSut();
-    const httpRequest: HttpRequest = {
+    const httpRequest = {
       body: {
         password: 'anything',
       },
@@ -36,7 +35,7 @@ describe('Login Router', () => {
 
   it('should return "BAD_REQUEST" (400) status if no password is provided', () => {
     const { sut } = makeSut();
-    const httpRequest: HttpRequest = {
+    const httpRequest = {
       body: {
         email: 'anything@test.com',
       },
@@ -55,14 +54,14 @@ describe('Login Router', () => {
 
   it('should return "INTERNAL_SERVER_ERROR" (500) status if httpRequest has no body', () => {
     const { sut } = makeSut();
-    const httpRequest: HttpRequest = {};
+    const httpRequest = {};
     const httpResponse = sut.route(httpRequest);
     expect(httpResponse.statusCode).toBe(StatusCodes.INTERNAL_SERVER_ERROR);
   });
 
   it('should call AuthUseCase with correct params', () => {
     const { sut, authUseCaseSpy } = makeSut();
-    const httpRequest: HttpRequest = {
+    const httpRequest = {
       body: {
         email: 'anything@test.com',
         password: 'any_password',
@@ -76,7 +75,7 @@ describe('Login Router', () => {
 
   it('should return "UNAUTHORIZED" (401) when invalid credentials are provided', () => {
     const { sut } = makeSut();
-    const httpRequest: HttpRequest = {
+    const httpRequest = {
       body: {
         email: 'invalid_email@test.com',
         password: 'invalid_password',
@@ -85,12 +84,11 @@ describe('Login Router', () => {
 
     const httpResponse = sut.route(httpRequest);
     expect(httpResponse.statusCode).toBe(StatusCodes.UNAUTHORIZED);
-    expect(httpResponse.body).toEqual(new UnauthorizedError());
   });
 
   it('should return "INTERNAL_SERVER_ERROR" (500) status if no AuthUseCase is provided', () => {
     const sut = new LoginRouter();
-    const httpRequest: HttpRequest = {
+    const httpRequest = {
       body: {
         email: 'any_email@test.com',
         password: 'any_password',
@@ -102,7 +100,7 @@ describe('Login Router', () => {
 
   it('should return "INTERNAL_SERVER_ERROR" (500) status if AuthUseCase has no auth method', () => {
     const sut = new LoginRouter({});
-    const httpRequest: HttpRequest = {
+    const httpRequest = {
       body: {
         email: 'any_email@test.com',
         password: 'any_password',

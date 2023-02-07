@@ -1,7 +1,5 @@
-type ParamName = 'email' | 'password';
-
 export class MissingParamError extends Error {
-  constructor(paramName: ParamName) {
+  constructor(paramName) {
     super(`Missing param: ${paramName}`);
     this.name = 'MissingParamError';
   }
