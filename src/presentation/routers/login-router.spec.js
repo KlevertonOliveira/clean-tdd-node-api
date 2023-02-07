@@ -186,4 +186,32 @@ describe('Login Router', () => {
     expect(response.statusCode).toBe(StatusCodes.BAD_REQUEST);
     expect(response.body).toEqual(new InvalidParamError('email'));
   });
+
+  it('should return "INTERNAL_SERVER_ERROR" (500) status if no EmailValidator is provided', async () => {
+    const authUseCaseSpy = makeAuthUseCase();
+    const sut = new LoginRouter(authUseCaseSpy);
+    const httpRequest = {
+      body: {
+        email: 'any_email@test.com',
+        password: 'any_password',
+      },
+    };
+    const response = await sut.route(httpRequest);
+    expect(response.statusCode).toBe(StatusCodes.INTERNAL_SERVER_ERROR);
+    expect(response.body).toEqual(new ServerError());
+  });
+
+  it('should return "INTERNAL_SERVER_ERROR" (500) status if EmailValidator has no isValid method', async () => {
+    const authUseCaseSpy = makeAuthUseCase();
+    const sut = new LoginRouter(authUseCaseSpy, {});
+    const httpRequest = {
+      body: {
+        email: 'any_email@test.com',
+        password: 'any_password',
+      },
+    };
+    const response = await sut.route(httpRequest);
+    expect(response.statusCode).toBe(StatusCodes.INTERNAL_SERVER_ERROR);
+    expect(response.body).toEqual(new ServerError());
+  });
 });
