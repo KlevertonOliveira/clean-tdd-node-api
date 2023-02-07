@@ -18,4 +18,10 @@ export class HttpResponse {
       statusCode: StatusCodes.UNAUTHORIZED,
     };
   }
+
+  static ok() {
+    return {
+      statusCode: StatusCodes.OK,
+    };
+  }
 }

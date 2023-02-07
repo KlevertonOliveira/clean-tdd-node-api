@@ -8,10 +8,12 @@ const makeSut = () => {
     auth(email, password) {
       this.email = email;
       this.password = password;
+      return this.accessToken;
     }
   }
 
   const authUseCaseSpy = new AuthUseCaseSpy();
+  authUseCaseSpy.accessToken = 'valid_token';
   const sut = new LoginRouter(authUseCaseSpy);
   return {
     sut,
@@ -73,8 +75,9 @@ describe('Login Router', () => {
     expect(authUseCaseSpy.password).toBe(httpRequest.body.password);
   });
 
-  it('should return "UNAUTHORIZED" (401) when invalid credentials are provided', () => {
-    const { sut } = makeSut();
+  it('should return "UNAUTHORIZED" (401) status when invalid credentials are provided', () => {
+    const { sut, authUseCaseSpy } = makeSut();
+    authUseCaseSpy.accessToken = null;
     const httpRequest = {
       body: {
         email: 'invalid_email@test.com',
@@ -84,6 +87,18 @@ describe('Login Router', () => {
 
     const httpResponse = sut.route(httpRequest);
     expect(httpResponse.statusCode).toBe(StatusCodes.UNAUTHORIZED);
+  });
+
+  it('should return "OK" (200) status when valid credentials are provided', () => {
+    const { sut } = makeSut();
+    const httpRequest = {
+      body: {
+        email: 'valid_email@test.com',
+        password: 'valid_password',
+      },
+    };
+    const httpResponse = sut.route(httpRequest);
+    expect(httpResponse.statusCode).toBe(StatusCodes.OK);
   });
 
   it('should return "INTERNAL_SERVER_ERROR" (500) status if no AuthUseCase is provided', () => {
