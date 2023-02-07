@@ -157,4 +157,18 @@ describe('Login Router', () => {
     expect(httpResponse.statusCode).toBe(StatusCodes.INTERNAL_SERVER_ERROR);
     expect(httpResponse.body).toEqual(new ServerError());
   });
+
+  // it('should return "BAD_REQUEST" (400) status if invalid email is provided', async () => {
+  //   const { sut } = makeSut();
+  //   const httpRequest = {
+  //     body: {
+  //       email: 'invalid_email@test.com',
+  //       password: 'anything',
+  //     },
+  //   };
+
+  //   const response = await sut.route(httpRequest);
+  //   expect(response.statusCode).toBe(StatusCodes.BAD_REQUEST);
+  //   expect(response.body).toEqual(new InvalidParamError('email'));
+  // });
 });

@@ -1,13 +1,12 @@
 import { StatusCodes } from 'http-status-codes';
-import { MissingParamError } from './missing-param-error';
 import { ServerError } from './server-error';
 import { UnauthorizedError } from './unauthorized-error';
 
 export class HttpResponse {
-  static badRequest(paramName) {
+  static badRequest(error) {
     return {
       statusCode: StatusCodes.BAD_REQUEST,
-      body: new MissingParamError(paramName),
+      body: error,
     };
   }
   static serverError() {
