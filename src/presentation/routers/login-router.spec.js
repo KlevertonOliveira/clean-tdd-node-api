@@ -90,7 +90,7 @@ describe('Login Router', () => {
   });
 
   it('should return "OK" (200) status when valid credentials are provided', () => {
-    const { sut } = makeSut();
+    const { sut, authUseCaseSpy } = makeSut();
     const httpRequest = {
       body: {
         email: 'valid_email@test.com',
@@ -99,6 +99,7 @@ describe('Login Router', () => {
     };
     const httpResponse = sut.route(httpRequest);
     expect(httpResponse.statusCode).toBe(StatusCodes.OK);
+    expect(httpResponse.body.accessToken).toEqual(authUseCaseSpy.accessToken);
   });
 
   it('should return "INTERNAL_SERVER_ERROR" (500) status if no AuthUseCase is provided', () => {

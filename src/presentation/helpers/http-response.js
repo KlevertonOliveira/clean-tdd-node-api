@@ -19,9 +19,10 @@ export class HttpResponse {
     };
   }
 
-  static ok() {
+  static ok(data) {
     return {
       statusCode: StatusCodes.OK,
+      body: data,
     };
   }
 }
