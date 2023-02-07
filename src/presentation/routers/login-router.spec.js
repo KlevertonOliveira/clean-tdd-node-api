@@ -1,5 +1,6 @@
 import { StatusCodes } from 'http-status-codes';
 import { describe, expect, it } from 'vitest';
+import { InvalidParamError } from '../helpers/invalid-param-error';
 import { MissingParamError } from '../helpers/missing-param-error';
 import { ServerError } from '../helpers/server-error';
 import { LoginRouter } from './login-router';
@@ -24,13 +25,26 @@ const makeAuthUseCaseWithError = () => {
   return new AuthUseCaseSpy();
 };
 
+const makeEmailValidator = () => {
+  class EmailValidatorSpy {
+    isValid(email) {
+      return this.isEmailValid;
+    }
+  }
+  const emailValidatorSpy = new EmailValidatorSpy();
+  emailValidatorSpy.isEmailValid = true;
+  return emailValidatorSpy;
+};
+
 const makeSut = () => {
+  const emailValidatorSpy = makeEmailValidator();
   const authUseCaseSpy = makeAuthUseCase();
   authUseCaseSpy.accessToken = 'valid_token';
-  const sut = new LoginRouter(authUseCaseSpy);
+  const sut = new LoginRouter(authUseCaseSpy, emailValidatorSpy);
   return {
     sut,
     authUseCaseSpy,
+    emailValidatorSpy,
   };
 };
 
@@ -158,17 +172,18 @@ describe('Login Router', () => {
     expect(httpResponse.body).toEqual(new ServerError());
   });
 
-  // it('should return "BAD_REQUEST" (400) status if invalid email is provided', async () => {
-  //   const { sut } = makeSut();
-  //   const httpRequest = {
-  //     body: {
-  //       email: 'invalid_email@test.com',
-  //       password: 'anything',
-  //     },
-  //   };
+  it('should return "BAD_REQUEST" (400) status if invalid email is provided', async () => {
+    const { emailValidatorSpy, sut } = makeSut();
+    emailValidatorSpy.isEmailValid = false;
+    const httpRequest = {
+      body: {
+        email: 'invalid_email@test.com',
+        password: 'anything',
+      },
+    };
 
-  //   const response = await sut.route(httpRequest);
-  //   expect(response.statusCode).toBe(StatusCodes.BAD_REQUEST);
-  //   expect(response.body).toEqual(new InvalidParamError('email'));
-  // });
+    const response = await sut.route(httpRequest);
+    expect(response.statusCode).toBe(StatusCodes.BAD_REQUEST);
+    expect(response.body).toEqual(new InvalidParamError('email'));
+  });
 });
