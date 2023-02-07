@@ -15,12 +15,17 @@ interface HttpResponse {
 }
 
 export class LoginRouter {
-  constructor(authUseCaseSpy) {
-    this.authUseCaseSpy = authUseCaseSpy;
+  constructor(authUseCase) {
+    this.authUseCase = authUseCase;
   }
 
   route(httpRequest?: HttpRequest): HttpResponse {
-    if (!httpRequest || !httpRequest.body) {
+    if (
+      !httpRequest ||
+      !httpRequest.body ||
+      !this.authUseCase ||
+      !this.authUseCase.auth
+    ) {
       return { statusCode: StatusCodes.INTERNAL_SERVER_ERROR } as HttpResponse;
     }
 
@@ -38,7 +43,7 @@ export class LoginRouter {
       } as HttpResponse;
     }
 
-    this.authUseCaseSpy.auth(email, password);
+    this.authUseCase.auth(email, password);
 
     return {
       statusCode: StatusCodes.UNAUTHORIZED,

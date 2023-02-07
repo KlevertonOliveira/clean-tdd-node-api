@@ -6,7 +6,7 @@ import { HttpRequest, LoginRouter } from './login-router';
 
 const makeSut = () => {
   class AuthUseCaseSpy {
-    auth(email, password) {
+    auth(email: string, password: string) {
       this.email = email;
       this.password = password;
     }
@@ -86,5 +86,29 @@ describe('Login Router', () => {
     const httpResponse = sut.route(httpRequest);
     expect(httpResponse.statusCode).toBe(StatusCodes.UNAUTHORIZED);
     expect(httpResponse.body).toEqual(new UnauthorizedError());
+  });
+
+  it('should return "INTERNAL_SERVER_ERROR" (500) status if no AuthUseCase is provided', () => {
+    const sut = new LoginRouter();
+    const httpRequest: HttpRequest = {
+      body: {
+        email: 'any_email@test.com',
+        password: 'any_password',
+      },
+    };
+    const httpResponse = sut.route(httpRequest);
+    expect(httpResponse.statusCode).toBe(StatusCodes.INTERNAL_SERVER_ERROR);
+  });
+
+  it('should return "INTERNAL_SERVER_ERROR" (500) status if AuthUseCase has no auth method', () => {
+    const sut = new LoginRouter({});
+    const httpRequest: HttpRequest = {
+      body: {
+        email: 'any_email@test.com',
+        password: 'any_password',
+      },
+    };
+    const httpResponse = sut.route(httpRequest);
+    expect(httpResponse.statusCode).toBe(StatusCodes.INTERNAL_SERVER_ERROR);
   });
 });
