@@ -1,6 +1,5 @@
 import { StatusCodes } from 'http-status-codes';
-import { ServerError } from '../errors/server-error';
-import { UnauthorizedError } from '../errors/unauthorized-error';
+import { ServerError, UnauthorizedError } from '../errors';
 
 export class HttpResponse {
   static badRequest(error) {
