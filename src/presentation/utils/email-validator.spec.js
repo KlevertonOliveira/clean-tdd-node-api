@@ -1,10 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { validator } from '../../../__mocks__/validator';
-class EmailValidator {
-  isValid(email) {
-    return validator.isEmail(email);
-  }
-}
+import { EmailValidator } from './email-validator';
 
 const makeSut = () => {
   return new EmailValidator();
