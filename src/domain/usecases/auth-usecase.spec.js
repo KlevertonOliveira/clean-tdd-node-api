@@ -82,24 +82,6 @@ describe('Auth UseCase', () => {
     expect(getUserByEmailRepositorySpy.email).toBe('any_email@test.com');
   });
 
-  it('Should throw if no dependency is provided', async () => {
-    const sut = new AuthUseCase();
-    const promise = sut.auth('any_email@test.com', 'any_password');
-    expect(promise).rejects.toThrow();
-  });
-
-  it('Should throw if no getUserByEmailRepository is provided', async () => {
-    const sut = new AuthUseCase({});
-    const promise = sut.auth('any_email@test.com', 'any_password');
-    expect(promise).rejects.toThrow();
-  });
-
-  it('Should throw if getUserByEmailRepository has no get method', async () => {
-    const sut = new AuthUseCase({ getUserByEmailRepository: {} });
-    const promise = sut.auth('any_email@test.com', 'any_password');
-    expect(promise).rejects.toThrow();
-  });
-
   it('Should return null if an invalid email is provided', async () => {
     const { sut, getUserByEmailRepositorySpy } = makeSut();
     getUserByEmailRepositorySpy.user = null;
@@ -143,5 +125,27 @@ describe('Auth UseCase', () => {
     );
     expect(accessToken).toBe(tokenGeneratorSpy.accessToken);
     expect(accessToken).toBeTruthy();
+  });
+
+  it('Should throw if invalid dependency is provided', async () => {
+    const invalid = {};
+    const suts = [].concat(
+      new AuthUseCase(),
+      new AuthUseCase({
+        getUserByEmailRepository: null,
+        encrypter: null,
+        tokenGenerator: null,
+      }),
+      new AuthUseCase({
+        getUserByEmailRepository: invalid,
+        encrypter: null,
+        tokenGenerator: null,
+      })
+    );
+
+    suts.forEach((sut) => {
+      const promise = sut.auth('any_email@test.com', 'any_password');
+      expect(promise).rejects.toThrow();
+    });
   });
 });
