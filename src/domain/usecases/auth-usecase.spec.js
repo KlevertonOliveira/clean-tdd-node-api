@@ -123,9 +123,19 @@ describe('Auth UseCase', () => {
     );
   });
 
-  it('Should call TokenGenerator with userId', async () => {
+  it('Should call TokenGenerator with correct userId', async () => {
     const { sut, getUserByEmailRepositorySpy, tokenGeneratorSpy } = makeSut();
     await sut.auth('valid_email@test.com', 'valid_password');
     expect(tokenGeneratorSpy.userId).toBe(getUserByEmailRepositorySpy.user.id);
+  });
+
+  it('Should return an accessToken if correct credentials are provided', async () => {
+    const { sut, tokenGeneratorSpy } = makeSut();
+    const accessToken = await sut.auth(
+      'valid_email@test.com',
+      'valid_password'
+    );
+    expect(accessToken).toBe(tokenGeneratorSpy.accessToken);
+    expect(accessToken).toBeTruthy();
   });
 });

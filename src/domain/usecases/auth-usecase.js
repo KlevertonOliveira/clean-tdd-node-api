@@ -11,15 +11,15 @@ export class AuthUseCase {
     if (!password) throw new MissingParamError('password');
 
     const user = await this.getUserByEmailRepository.get(email);
-    if (!user) {
-      return null;
-    }
+    if (!user) return null;
 
-    const isValid = await this.encrypter.compare(password, user.password);
-    if (!isValid) {
-      return null;
-    }
+    const isPasswordValid = await this.encrypter.compare(
+      password,
+      user.password
+    );
+    if (!isPasswordValid) return null;
 
-    await this.tokenGenerator.generate(user.id);
+    const accessToken = await this.tokenGenerator.generate(user.id);
+    return accessToken;
   }
 }
