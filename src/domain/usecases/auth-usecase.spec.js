@@ -49,11 +49,11 @@ const makeSut = () => {
   const tokenGeneratorSpy = makeTokenGenerator();
   const encrypterSpy = makeEncrypter();
   const getUserByEmailRepositorySpy = makeGetUserByEmailRepository();
-  const sut = new AuthUseCase(
-    getUserByEmailRepositorySpy,
-    encrypterSpy,
-    tokenGeneratorSpy
-  );
+  const sut = new AuthUseCase({
+    getUserByEmailRepository: getUserByEmailRepositorySpy,
+    encrypter: encrypterSpy,
+    tokenGenerator: tokenGeneratorSpy,
+  });
 
   return {
     sut,
@@ -83,13 +83,13 @@ describe('Auth UseCase', () => {
   });
 
   it('Should throw if no getUserByEmailRepository is provided', async () => {
-    const sut = new AuthUseCase();
+    const sut = new AuthUseCase({});
     const promise = sut.auth('any_email@test.com', 'any_password');
     expect(promise).rejects.toThrow();
   });
 
   it('Should throw if getUserByEmailRepository has no get method', async () => {
-    const sut = new AuthUseCase({});
+    const sut = new AuthUseCase({ getUserByEmailRepository: {} });
     const promise = sut.auth('any_email@test.com', 'any_password');
     expect(promise).rejects.toThrow();
   });

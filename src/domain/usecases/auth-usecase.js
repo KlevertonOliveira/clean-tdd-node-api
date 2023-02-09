@@ -1,7 +1,7 @@
 import { MissingParamError } from '../../utils/errors';
 
 export class AuthUseCase {
-  constructor(getUserByEmailRepository, encrypter, tokenGenerator) {
+  constructor({ getUserByEmailRepository, encrypter, tokenGenerator }) {
     this.getUserByEmailRepository = getUserByEmailRepository;
     this.encrypter = encrypter;
     this.tokenGenerator = tokenGenerator;
