@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { MissingParamError } from '../../utils/errors';
+import { InvalidParamError, MissingParamError } from '../../utils/errors';
 
 class AuthUseCase {
   constructor(getUserByEmailRepository) {
@@ -8,6 +8,11 @@ class AuthUseCase {
   async auth(email, password) {
     if (!email) throw new MissingParamError('email');
     if (!password) throw new MissingParamError('password');
+    if (!this.getUserByEmailRepository)
+      throw new MissingParamError('getUserByEmailRepository');
+    if (!this.getUserByEmailRepository.get)
+      throw new InvalidParamError('getUserByEmailRepository');
+
     await this.getUserByEmailRepository.get(email);
   }
 }
@@ -44,5 +49,21 @@ describe('Auth UseCase', () => {
     const { sut, getUserByEmailRepositorySpy } = makeSut();
     await sut.auth('any_email@test.com', 'any_password');
     expect(getUserByEmailRepositorySpy.email).toBe('any_email@test.com');
+  });
+
+  it('Should throw if no getUserByEmailRepository is provided', async () => {
+    const sut = new AuthUseCase();
+    const promise = sut.auth('any_email@test.com', 'any_password');
+    expect(promise).rejects.toThrow(
+      new MissingParamError('getUserByEmailRepository')
+    );
+  });
+
+  it('Should throw if getUserByEmailRepository has no get method', async () => {
+    const sut = new AuthUseCase({});
+    const promise = sut.auth('any_email@test.com', 'any_password');
+    expect(promise).rejects.toThrow(
+      new InvalidParamError('getUserByEmailRepository')
+    );
   });
 });
