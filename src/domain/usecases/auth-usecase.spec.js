@@ -6,9 +6,11 @@ const makeSut = () => {
   class GetUserByEmailRepositorySpy {
     async get(email) {
       this.email = email;
+      return this.user;
     }
   }
   const getUserByEmailRepositorySpy = new GetUserByEmailRepositorySpy();
+  getUserByEmailRepositorySpy.user = {};
   const sut = new AuthUseCase(getUserByEmailRepositorySpy);
 
   return {
@@ -48,11 +50,21 @@ describe('Auth UseCase', () => {
     expect(promise).rejects.toThrow();
   });
 
-  it('Should return null if getUserByEmailRepository returns null', async () => {
-    const { sut } = makeSut();
+  it('Should return null if an invalid email is provided', async () => {
+    const { sut, getUserByEmailRepositorySpy } = makeSut();
+    getUserByEmailRepositorySpy.user = null;
     const accessToken = await sut.auth(
       'invalid_email@test.com',
       'any_password'
+    );
+    expect(accessToken).toBeNull();
+  });
+
+  it('Should return null if an invalid password is provided', async () => {
+    const { sut } = makeSut();
+    const accessToken = await sut.auth(
+      'valid_email@test.com',
+      'invalid_password'
     );
     expect(accessToken).toBeNull();
   });
