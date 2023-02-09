@@ -1,6 +1,7 @@
 import { StatusCodes } from 'http-status-codes';
 import { describe, expect, it } from 'vitest';
-import { InvalidParamError, MissingParamError, ServerError } from '../errors';
+import { ServerError } from '../errors';
+import { InvalidParamError, MissingParamError } from '../utils/errors';
 import { LoginRouter } from './login-router';
 
 const makeAuthUseCase = () => {
