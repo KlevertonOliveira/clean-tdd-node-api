@@ -1,24 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { InvalidParamError, MissingParamError } from '../../utils/errors';
-
-class AuthUseCase {
-  constructor(getUserByEmailRepository) {
-    this.getUserByEmailRepository = getUserByEmailRepository;
-  }
-  async auth(email, password) {
-    if (!email) throw new MissingParamError('email');
-    if (!password) throw new MissingParamError('password');
-    if (!this.getUserByEmailRepository)
-      throw new MissingParamError('getUserByEmailRepository');
-    if (!this.getUserByEmailRepository.get)
-      throw new InvalidParamError('getUserByEmailRepository');
-
-    const user = await this.getUserByEmailRepository.get(email);
-    if (!user) {
-      return null;
-    }
-  }
-}
+import { AuthUseCase } from './auth-usecase';
 
 const makeSut = () => {
   class GetUserByEmailRepositorySpy {
@@ -45,7 +27,7 @@ describe('Auth UseCase', () => {
   it('Should throw MissingParamError if no password is provided', async () => {
     const { sut } = makeSut();
     const promise = sut.auth('any_email@test.com');
-    expect(promise).rejects.toThrow(new MissingParamError('password'));
+    await expect(promise).rejects.toThrow(new MissingParamError('password'));
   });
 
   it('Should call getUserByEmailRepository with correct email', async () => {
