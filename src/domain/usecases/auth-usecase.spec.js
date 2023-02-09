@@ -2,6 +2,19 @@ import { describe, expect, it } from 'vitest';
 import { MissingParamError } from '../../utils/errors';
 import { AuthUseCase } from './auth-usecase';
 
+const makeTokenGenerator = () => {
+  class TokenGeneratorSpy {
+    async generate(userId) {
+      this.userId = userId;
+      return this.accessToken;
+    }
+  }
+
+  const tokenGeneratorSpy = new TokenGeneratorSpy();
+  tokenGeneratorSpy.accessToken = 'any_token';
+  return tokenGeneratorSpy;
+};
+
 const makeEncrypter = () => {
   class EncrypterSpy {
     async compare(password, hashedPassword) {
@@ -26,20 +39,27 @@ const makeGetUserByEmailRepository = () => {
 
   const getUserByEmailRepositorySpy = new GetUserByEmailRepositorySpy();
   getUserByEmailRepositorySpy.user = {
+    id: 'any_id',
     password: 'hashed_password',
   };
   return getUserByEmailRepositorySpy;
 };
 
 const makeSut = () => {
+  const tokenGeneratorSpy = makeTokenGenerator();
   const encrypterSpy = makeEncrypter();
   const getUserByEmailRepositorySpy = makeGetUserByEmailRepository();
-  const sut = new AuthUseCase(getUserByEmailRepositorySpy, encrypterSpy);
+  const sut = new AuthUseCase(
+    getUserByEmailRepositorySpy,
+    encrypterSpy,
+    tokenGeneratorSpy
+  );
 
   return {
     sut,
     getUserByEmailRepositorySpy,
     encrypterSpy,
+    tokenGeneratorSpy,
   };
 };
 
@@ -101,5 +121,11 @@ describe('Auth UseCase', () => {
     expect(encrypterSpy.hashedPassword).toBe(
       getUserByEmailRepositorySpy.user.password
     );
+  });
+
+  it('Should call TokenGenerator with userId', async () => {
+    const { sut, getUserByEmailRepositorySpy, tokenGeneratorSpy } = makeSut();
+    await sut.auth('valid_email@test.com', 'valid_password');
+    expect(tokenGeneratorSpy.userId).toBe(getUserByEmailRepositorySpy.user.id);
   });
 });
