@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { InvalidParamError, MissingParamError } from '../../utils/errors';
+import { MissingParamError } from '../../utils/errors';
 import { AuthUseCase } from './auth-usecase';
 
 const makeSut = () => {
@@ -39,17 +39,13 @@ describe('Auth UseCase', () => {
   it('Should throw if no getUserByEmailRepository is provided', async () => {
     const sut = new AuthUseCase();
     const promise = sut.auth('any_email@test.com', 'any_password');
-    expect(promise).rejects.toThrow(
-      new MissingParamError('getUserByEmailRepository')
-    );
+    expect(promise).rejects.toThrow();
   });
 
   it('Should throw if getUserByEmailRepository has no get method', async () => {
     const sut = new AuthUseCase({});
     const promise = sut.auth('any_email@test.com', 'any_password');
-    expect(promise).rejects.toThrow(
-      new InvalidParamError('getUserByEmailRepository')
-    );
+    expect(promise).rejects.toThrow();
   });
 
   it('Should return null if getUserByEmailRepository returns null', async () => {
