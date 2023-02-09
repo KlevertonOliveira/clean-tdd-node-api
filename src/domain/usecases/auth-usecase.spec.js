@@ -12,27 +12,36 @@ class AuthUseCase {
   }
 }
 
+const makeSut = () => {
+  class GetUserByEmailRepositorySpy {
+    async get(email) {
+      this.email = email;
+    }
+  }
+  const getUserByEmailRepositorySpy = new GetUserByEmailRepositorySpy();
+  const sut = new AuthUseCase(getUserByEmailRepositorySpy);
+
+  return {
+    sut,
+    getUserByEmailRepositorySpy,
+  };
+};
+
 describe('Auth UseCase', () => {
   it('Should throw MissingParamError if no email is provided', async () => {
-    const sut = new AuthUseCase();
+    const { sut } = makeSut();
     const promise = sut.auth();
     expect(promise).rejects.toThrow(new MissingParamError('email'));
   });
 
   it('Should throw MissingParamError if no password is provided', async () => {
-    const sut = new AuthUseCase();
+    const { sut } = makeSut();
     const promise = sut.auth('any_email@test.com');
     expect(promise).rejects.toThrow(new MissingParamError('password'));
   });
 
   it('Should call getUserByEmailRepository with correct email', async () => {
-    class GetUserByEmailRepositorySpy {
-      async get(email) {
-        this.email = email;
-      }
-    }
-    const getUserByEmailRepositorySpy = new GetUserByEmailRepositorySpy();
-    const sut = new AuthUseCase(getUserByEmailRepositorySpy);
+    const { sut, getUserByEmailRepositorySpy } = makeSut();
     await sut.auth('any_email@test.com', 'any_password');
     expect(getUserByEmailRepositorySpy.email).toBe('any_email@test.com');
   });
