@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { validator } from '../../../__mocks__/validator';
+import { validator } from '../../__mocks__/validator';
 
 export class EmailValidator {
   isValid(email) {
