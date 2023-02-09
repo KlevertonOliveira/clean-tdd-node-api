@@ -3,19 +3,30 @@ import { MissingParamError } from '../../utils/errors';
 import { AuthUseCase } from './auth-usecase';
 
 const makeSut = () => {
+  class EncrypterSpy {
+    async compare(password, hashedPassword) {
+      this.password = password;
+      this.hashedPassword = hashedPassword;
+      // return password === hashedPassword;
+    }
+  }
   class GetUserByEmailRepositorySpy {
     async get(email) {
       this.email = email;
       return this.user;
     }
   }
+  const encrypterSpy = new EncrypterSpy();
   const getUserByEmailRepositorySpy = new GetUserByEmailRepositorySpy();
-  getUserByEmailRepositorySpy.user = {};
-  const sut = new AuthUseCase(getUserByEmailRepositorySpy);
+  getUserByEmailRepositorySpy.user = {
+    password: 'hashed_password',
+  };
+  const sut = new AuthUseCase(getUserByEmailRepositorySpy, encrypterSpy);
 
   return {
     sut,
     getUserByEmailRepositorySpy,
+    encrypterSpy,
   };
 };
 
@@ -67,5 +78,14 @@ describe('Auth UseCase', () => {
       'invalid_password'
     );
     expect(accessToken).toBeNull();
+  });
+
+  it('Should call Encrypter with correct values', async () => {
+    const { sut, getUserByEmailRepositorySpy, encrypterSpy } = makeSut();
+    await sut.auth('valid_email@test.com', 'any_password');
+    expect(encrypterSpy.password).toBe('any_password');
+    expect(encrypterSpy.hashedPassword).toBe(
+      getUserByEmailRepositorySpy.user.password
+    );
   });
 });
