@@ -15,6 +15,16 @@ const makeTokenGenerator = () => {
   return tokenGeneratorSpy;
 };
 
+const makeTokenGeneratorWithError = () => {
+  class TokenGeneratorSpy {
+    async generate() {
+      throw new Error();
+    }
+  }
+
+  return new TokenGeneratorSpy();
+};
+
 const makeEncrypter = () => {
   class EncrypterSpy {
     async compare(password, hashedPassword) {
@@ -27,6 +37,16 @@ const makeEncrypter = () => {
   const encrypterSpy = new EncrypterSpy();
   encrypterSpy.isValid = true;
   return encrypterSpy;
+};
+
+const makeEncrypterWithError = () => {
+  class EncrypterSpy {
+    async compare() {
+      throw new Error();
+    }
+  }
+
+  return new EncrypterSpy();
 };
 
 const makeGetUserByEmailRepository = () => {
@@ -43,6 +63,16 @@ const makeGetUserByEmailRepository = () => {
     password: 'hashed_password',
   };
   return getUserByEmailRepositorySpy;
+};
+
+const makeGetUserByEmailRepositoryWithError = () => {
+  class GetUserByEmailRepositorySpy {
+    async get() {
+      throw new Error();
+    }
+  }
+
+  return new GetUserByEmailRepositorySpy();
 };
 
 const makeSut = () => {
@@ -162,6 +192,30 @@ describe('Auth UseCase', () => {
         getUserByEmailRepository,
         encrypter,
         tokenGenerator: invalid,
+      })
+    );
+
+    suts.forEach((sut) => {
+      const promise = sut.auth('any_email@test.com', 'any_password');
+      expect(promise).rejects.toThrow();
+    });
+  });
+
+  it('Should throw if any dependency throws', async () => {
+    const getUserByEmailRepository = makeGetUserByEmailRepository();
+    const encrypter = makeEncrypter();
+    const suts = [].concat(
+      new AuthUseCase({
+        getUserByEmailRepository: makeGetUserByEmailRepositoryWithError(),
+      }),
+      new AuthUseCase({
+        getUserByEmailRepository,
+        encrypter: makeEncrypterWithError(),
+      }),
+      new AuthUseCase({
+        getUserByEmailRepository,
+        encrypter,
+        tokenGenerator: makeTokenGeneratorWithError(),
       })
     );
 
