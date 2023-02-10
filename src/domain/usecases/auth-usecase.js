@@ -5,6 +5,7 @@ export class AuthUseCase {
     this.getUserByEmailRepository = args.getUserByEmailRepository;
     this.encrypter = args.encrypter;
     this.tokenGenerator = args.tokenGenerator;
+    this.updateAccessTokenRepository = args.updateAccessTokenRepository;
   }
   async auth(email, password) {
     if (!email) throw new MissingParamError('email');
@@ -16,6 +17,7 @@ export class AuthUseCase {
 
     if (user && isPasswordValid) {
       const accessToken = await this.tokenGenerator.generate(user.id);
+      await this.updateAccessTokenRepository.update(user.id, accessToken);
       return accessToken;
     }
 
