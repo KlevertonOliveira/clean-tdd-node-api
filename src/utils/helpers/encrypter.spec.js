@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { bcrypt } from '../../../__mocks__/bcrypt';
 
-class Encrypter {
+class EncrypterSpy {
   async compare(value, hash) {
     const isPasswordValid = await bcrypt.compare(value, hash);
     return isPasswordValid;
@@ -9,7 +9,7 @@ class Encrypter {
 }
 
 const makeSut = () => {
-  return new Encrypter();
+  return new EncrypterSpy();
 };
 
 describe('Encrypter', () => {
