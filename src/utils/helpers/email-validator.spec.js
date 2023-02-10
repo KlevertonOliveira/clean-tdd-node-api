@@ -1,8 +1,10 @@
 import { describe, expect, it } from 'vitest';
-import { validator } from '../../__mocks__/validator';
+import { MissingParamError } from '../errors';
+import { validator } from '../../../__mocks__/validator';
 
-export class EmailValidator {
+class EmailValidator {
   isValid(email) {
+    if (!email) throw new MissingParamError('email');
     return validator.isEmail(email);
   }
 }
@@ -30,5 +32,12 @@ describe('Email Validator', () => {
     const testEmail = 'any_email@test.com';
     sut.isValid(testEmail);
     expect(validator.email).toBe(testEmail);
+  });
+
+  it('Should throw if no email is provided', async () => {
+    const sut = makeSut();
+    expect(() => {
+      sut.isValid();
+    }).toThrow(new MissingParamError('email'));
   });
 });
