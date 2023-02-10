@@ -2,6 +2,26 @@ import { describe, expect, it } from 'vitest';
 import { MissingParamError } from '../../utils/errors';
 import { AuthUseCase } from './auth-usecase';
 
+const makeUpdateAccessTokenRepository = () => {
+  class UpdateAccessTokenRepositorySpy {
+    async update(userId, accessToken) {
+      this.userId = userId;
+      this.accessToken = accessToken;
+    }
+  }
+
+  return new UpdateAccessTokenRepositorySpy();
+};
+
+const makeUpdateAccessTokenRepositoryWithError = () => {
+  class UpdateAccessTokenRepositorySpy {
+    async update() {
+      throw new Error();
+    }
+  }
+  return new UpdateAccessTokenRepositorySpy();
+};
+
 const makeTokenGenerator = () => {
   class TokenGeneratorSpy {
     async generate(userId) {
@@ -73,17 +93,6 @@ const makeGetUserByEmailRepositoryWithError = () => {
   }
 
   return new GetUserByEmailRepositorySpy();
-};
-
-const makeUpdateAccessTokenRepository = () => {
-  class UpdateAccessTokenRepository {
-    async update(userId, accessToken) {
-      this.userId = userId;
-      this.accessToken = accessToken;
-    }
-  }
-
-  return new UpdateAccessTokenRepository();
 };
 
 const makeSut = () => {
@@ -248,6 +257,7 @@ describe('Auth UseCase', () => {
   it('Should throw if any dependency throws', async () => {
     const getUserByEmailRepository = makeGetUserByEmailRepository();
     const encrypter = makeEncrypter();
+    const tokenGenerator = makeTokenGenerator();
     const suts = [].concat(
       new AuthUseCase({
         getUserByEmailRepository: makeGetUserByEmailRepositoryWithError(),
@@ -260,6 +270,12 @@ describe('Auth UseCase', () => {
         getUserByEmailRepository,
         encrypter,
         tokenGenerator: makeTokenGeneratorWithError(),
+      }),
+      new AuthUseCase({
+        getUserByEmailRepository,
+        encrypter,
+        tokenGenerator,
+        updateAccessTokenRepository: makeUpdateAccessTokenRepositoryWithError(),
       })
     );
 
