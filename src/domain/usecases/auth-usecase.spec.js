@@ -187,10 +187,12 @@ describe('Auth UseCase', () => {
     );
   });
 
-  it('Should throw if invalid dependency is provided', async () => {
+  it('Should throw if invalid dependencies are provided', async () => {
     const invalid = {};
     const getUserByEmailRepository = makeGetUserByEmailRepository();
     const encrypter = makeEncrypter();
+    const tokenGenerator = makeTokenGenerator();
+
     const suts = [].concat(
       new AuthUseCase(),
       new AuthUseCase({
@@ -222,6 +224,18 @@ describe('Auth UseCase', () => {
         getUserByEmailRepository,
         encrypter,
         tokenGenerator: invalid,
+      }),
+      new AuthUseCase({
+        getUserByEmailRepository,
+        encrypter,
+        tokenGenerator,
+        updateAccessTokenRepository: null,
+      }),
+      new AuthUseCase({
+        getUserByEmailRepository,
+        encrypter,
+        tokenGenerator,
+        updateAccessTokenRepository: invalid,
       })
     );
 
